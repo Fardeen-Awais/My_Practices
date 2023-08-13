@@ -1,0 +1,10 @@
+{
+    "server-component": {
+      "welcome": "اردو"
+    },
+    "counter": {
+      "increment": "افزائش دیں",
+      "decrement": "کمی کریں"
+    }
+  }
+  

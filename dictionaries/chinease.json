@@ -1,0 +1,10 @@
+{
+    "server-component": {
+      "welcome": "中国人"
+    },
+    "counter": {
+      "increment": "增加",
+      "decrement": "减少"
+    }
+  }
+  

@@ -1,34 +1,52 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Language switcher in next application
 
-## Getting Started
+## Here are the steps to switch the language
 
-First, run the development server:
+Step01 : Make the middleware.ts and import some library to determind user prefered language
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+```javascript
+yarn add @formatjs/intl-localematcher
+yarn add @types/negotiator
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+@formatjs/intl-localematcher:
+This library is used for language/locale matching. It helps you determine the best-matching locale based on the user's preferences and the locales you support. In other words, it helps you figure out which language to show to the user based on their browser's preferred languages and the languages your application supports.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Negotiator:
+Negotiator is a library that helps you handle HTTP content negotiation. In this context, content negotiation means figuring out what type of content the user prefers. In your code, you're using it to extract the languages the user prefers based on the accept-language header in the HTTP request.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Code: 
 
-## Learn More
+```javascript
+import { match } from '@formatjs/intl-localematcher' // yarn add @formatjs/intl-localematcher
+import Negotiator from 'negotiator'
+ 
+let headers = { 'accept-language': 'en-US,en;q=0.5' }
+let languages = new Negotiator({ headers }).languages() // This will extract user prefered language
+let locales = ['en-US', 'nl-NL', 'nl']
+let defaultLocale = 'en-US'
+ 
+match(languages, locales, defaultLocale) // -> 'en-US'
+```
 
-To learn more about Next.js, take a look at the following resources:
+After that we imported:
+```javascript
+import 'server-only'
+import type { Locale } from './i8n-config'
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+// We enumerate all dictionaries here for better linting and typescript support
+// We also get the default import for cleaner types
+const dictionaries = {
+  en: () => import('./dictionaries/en.json').then((module) => module.default),
+  de: () => import('./dictionaries/de.json').then((module) => module.default),
+  cs: () => import('./dictionaries/cs.json').then((module) => module.default),
+  urdu: () => import('./dictionaries/cs.json').then((module) => module.default),
+}
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+export const getDictionary = async (locale: Locale) =>
+  dictionaries[locale]?.() ?? dictionaries.en()
 
-## Deploy on Vercel
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Each dictionaries files such cs.json, de.json and en.json are presented the content in json form. You can also use it as constants of the web application. 
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
